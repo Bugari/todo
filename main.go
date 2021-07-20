@@ -15,7 +15,9 @@ limitations under the License.
 */
 package main
 
-import "github.com/Bugari/todo/cmd"
+import (
+	"todo/cmd"
+)
 
 func main() {
 	cmd.Execute()
