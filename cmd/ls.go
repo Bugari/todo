@@ -55,7 +55,7 @@ func resetSeq(tasks *[]db.Task) error {
 	}
 
 	for i := 0; i < len(*tasks); i++ {
-		thisTask := (*tasks)[i]
+		thisTask := &(*tasks)[i]
 		thisTask.Seq = i + 1
 		if err := tx.Save(&thisTask).Error; err != nil {
 			return err

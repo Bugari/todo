@@ -17,7 +17,7 @@ You can use tags #like #this`,
 	Run: func(cmd *cobra.Command, args []string) {
 		task := db.Task{Name: args[0]}
 		db.Conn.Create(&task)
-		fmt.Printf("Created Task %d: %s", task.ID, task.Name)
+		fmt.Printf("Created Task %s: %s\n", task.ID.String(), task.Name)
 	},
 }
 
