@@ -8,6 +8,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var renderDone bool = false
+
+func getFilter() string {
+	if renderDone {
+		return "done is not null"
+	} else {
+		return "done is null"
+	}
+}
+
 func printTasks(tasks *[]db.Task) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
@@ -31,7 +41,7 @@ Listing updates ordering for following commands.
 Currently lists only undone tasks`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var tasks []db.Task
-		db.Conn.Find(&tasks, "done is null")
+		db.Conn.Find(&tasks, getFilter())
 		if err := resetSeq(&tasks); err != nil {
 			panic(err)
 		}
@@ -65,5 +75,6 @@ func resetSeq(tasks *[]db.Task) error {
 }
 
 func init() {
+	lsCmd.Flags().BoolVar(&renderDone, "done", false, "display only finished tasks")
 	rootCmd.AddCommand(lsCmd)
 }
