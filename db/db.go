@@ -7,9 +7,9 @@ import (
 
 var Conn *gorm.DB
 
-func init() {
+func OpenDb(locator string) {
 	var err error
-	Conn, err = gorm.Open(sqlite.Open("todo.db"), &gorm.Config{})
+	Conn, err = gorm.Open(sqlite.Open(locator), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
