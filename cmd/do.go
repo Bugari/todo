@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// addCmd represents the add command
+// doCmd represents the add command
 var doCmd = &cobra.Command{
 	Use:   "do",
 	Short: "Mark task as done",
@@ -32,7 +32,7 @@ var doCmd = &cobra.Command{
 		task.Done = &now
 		db.Conn.Save(&task)
 
-		fmt.Printf("Task #%d marked as done: %s", task.Seq, task.Name)
+		fmt.Printf("Task #%d marked as done: %s\n", task.Seq, task.Name)
 	},
 }
 
