@@ -21,9 +21,9 @@ var rmCmd = &cobra.Command{
 		}
 
 		var task db.Task
-		db.Conn.First(&task, "seq = ?", taskNum)
-		if task.CreatedAt.IsZero() {
-			panic(fmt.Sprintf("Incorrect task number: \"%s\"\n", args[0]))
+		result := db.Conn.First(&task, "seq = ?", taskNum)
+		if result.RowsAffected == 0 {
+			panic(fmt.Sprintf("Unknown task number: \"%s\"\n", args[0]))
 		}
 		if err := db.Conn.Delete(&task).Error; err != nil {
 			panic(err)
