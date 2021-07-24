@@ -14,7 +14,7 @@ type Task struct {
 	ID   uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Seq  int       `gorm:"index;"`
 	Name string
-	Done time.Time
+	Done *time.Time
 	Tags []*Tag `gorm:"many2many:task_tags;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 

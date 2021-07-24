@@ -12,9 +12,8 @@ import (
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add new task",
-	Long: `Add new task
-You will be told more
-when time comes.`,
+	Long: `Add new task.
+You can use tags #like #this`,
 	Run: func(cmd *cobra.Command, args []string) {
 		task := db.Task{Name: args[0]}
 		db.Conn.Create(&task)

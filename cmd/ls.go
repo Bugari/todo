@@ -26,12 +26,12 @@ func printTasks(tasks *[]db.Task) {
 var lsCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "list tasks",
-	Long: `List all tasks
-You will be told more
-when time comes.`,
+	Long: `List tasks.
+Listing updates ordering for following commands.
+Currently lists only undone tasks`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var tasks []db.Task
-		db.Conn.Find(&tasks)
+		db.Conn.Find(&tasks, "done is null")
 		if err := resetSeq(&tasks); err != nil {
 			panic(err)
 		}
@@ -50,13 +50,14 @@ func resetSeq(tasks *[]db.Task) error {
 		return err
 	}
 
-	if err := tx.Model(&db.Task{}).Where("1 == 1").Update("seq", nil).Error; err != nil {
+	if err := tx.Model(&db.Task{}).Where("1 = 1").Update("seq", nil).Error; err != nil {
 		return err
 	}
 
-	for i := 0; i <= len(*tasks); i++ {
-		(*tasks)[i].Seq = i + 1
-		if err := tx.Save(&(*tasks)[i]).Error; err != nil {
+	for i := 0; i < len(*tasks); i++ {
+		thisTask := (*tasks)[i]
+		thisTask.Seq = i + 1
+		if err := tx.Save(&thisTask).Error; err != nil {
 			return err
 		}
 	}
