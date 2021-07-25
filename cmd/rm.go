@@ -19,11 +19,11 @@ var rmCmd = &cobra.Command{
 		if err != nil {
 			panic(fmt.Sprintf("Incorrect task number: \"%s\"\n", args[0]))
 		}
-		handleRm(taskNum)
+		HandleRm(taskNum)
 	},
 }
 
-func handleRm(taskNum int) {
+func HandleRm(taskNum int) {
 	var task db.Task
 	result := db.Conn.First(&task, "seq = ?", taskNum)
 	if result.RowsAffected != 1 {

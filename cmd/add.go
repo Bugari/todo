@@ -17,12 +17,12 @@ var addCmd = &cobra.Command{
 You can use tags #like #this`,
 	Run: func(cmd *cobra.Command, args []string) {
 		task := db.Task{Name: args[0]}
-		handleAdd(&task)
+		HandleAdd(&task)
 		fmt.Printf("Created Task %s: %s\n", task.ID.String(), task.Name)
 	},
 }
 
-func handleAdd(task *db.Task) (tx *gorm.DB) {
+func HandleAdd(task *db.Task) (tx *gorm.DB) {
 	return db.Conn.Create(&task)
 }
 
