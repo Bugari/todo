@@ -26,20 +26,20 @@ var _ = Describe("Commands", func() {
 			var countExpected int64 = 1
 			var countGot int64 = -1
 
-			x := HandleAdd(&taskToAdd)
+			_, err := HandleAdd("task", "")
 
-			Expect(x.RowsAffected).To(Equal(countExpected), "row is added")
+			Expect(err).To(BeNil(), "error while adding task")
 
 			db.Conn.Model(&db.Task{}).Where("name = ?", taskToAdd.Name).Count(&countGot)
-			Expect(countExpected).To(Equal(countGot), "task name exists in the db")
+			Expect(countExpected).To(Equal(countGot), "task name does not exist in the db")
 		})
 
 		It("should add multiple tasks properly", func() {
-			var tasks = []db.Task{{Seq: 1, Name: "task 1"}, {Seq: 2, Name: "task 2"}, {Seq: 3, Name: "task 3"}}
+			var tasks = []string{"task 1", "task 2", "task 3"}
 			var countAfter int64 = 0
 
 			for _, t := range tasks {
-				HandleAdd(&t)
+				HandleAdd(t, "")
 			}
 
 			db.Conn.Model(&db.Task{}).Where("1 = 1").Count(&countAfter)
@@ -73,6 +73,32 @@ var _ = Describe("Commands", func() {
 			Expect(remainingTasks).To(HaveLen(2), fmt.Sprintf("Expected 2 tasks, got %d", len(remainingTasks)))
 			Expect(remainingTasks[0].Seq).To(Equal(1), "Wrong task was removed")
 			Expect(remainingTasks[1].Seq).To(Equal(3), "Wrong task was removed")
+		})
+	})
+	Context("Priorities", func() {
+		store := func(priority string) *db.Task {
+			_, err := HandleAdd("task", priority)
+			Expect(err).To(BeNil())
+
+			var retrievedTask db.Task
+			db.Conn.Model(&db.Task{}).First(&retrievedTask)
+			return &retrievedTask
+		}
+		It("should store high priority correctly", func() {
+			task := store("high")
+			Expect(task.GetPriority()).To(Equal("High"))
+		})
+		It("should store medium priority correctly", func() {
+			task := store("med")
+			Expect(task.GetPriority()).To(Equal("Medium"))
+		})
+		It("should store low priority correctly", func() {
+			task := store("lo")
+			Expect(task.GetPriority()).To(Equal("Low"))
+		})
+		It("should store default priority correctly", func() {
+			task := store("")
+			Expect(task.GetPriority()).To(Equal(""))
 		})
 	})
 })

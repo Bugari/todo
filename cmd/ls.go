@@ -6,26 +6,27 @@ import (
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
+	"gorm.io/gorm"
 )
 
 var renderDone bool = false
 
-func getFilter() string {
+func ScopeDone(db *gorm.DB) *gorm.DB {
 	if renderDone {
-		return "done is not null"
+		return db.Where("done is not null")
 	} else {
-		return "done is null"
+		return db.Where("done is null")
 	}
 }
 
 func printTasks(tasks *[]db.Task) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"ID", "Seq", "Name"})
+	t.AppendHeader(table.Row{"ID", "Seq", "Priority", "Name"})
 
 	rows := make([]table.Row, len(*tasks))
 	for i, task := range *tasks {
-		rows[i] = table.Row{task.ID, task.Seq, task.Name}
+		rows[i] = table.Row{task.ID, task.Seq, task.GetPriority(), task.Name}
 	}
 
 	t.AppendRows(rows)
@@ -41,7 +42,7 @@ Listing updates ordering for following commands.
 Currently lists only undone tasks`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var tasks []db.Task
-		db.Conn.Find(&tasks, getFilter())
+		db.Conn.Scopes(ScopeDone).Order("priority asc, created_at").Find(&tasks)
 		if err := resetSeq(&tasks); err != nil {
 			panic(err)
 		}

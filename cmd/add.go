@@ -6,8 +6,9 @@ import (
 	"todo/db"
 
 	"github.com/spf13/cobra"
-	"gorm.io/gorm"
 )
+
+var priorityRaw = ""
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
@@ -16,16 +17,22 @@ var addCmd = &cobra.Command{
 	Long: `Add new task.
 You can use tags #like #this`,
 	Run: func(cmd *cobra.Command, args []string) {
-		task := db.Task{Name: args[0]}
-		HandleAdd(&task)
+		task, err := HandleAdd(args[0], priorityRaw)
+		if err != nil {
+			panic(err)
+		}
 		fmt.Printf("Created Task %s: %s\n", task.ID.String(), task.Name)
 	},
 }
 
-func HandleAdd(task *db.Task) (tx *gorm.DB) {
-	return db.Conn.Create(&task)
+func HandleAdd(name string, priority string) (*db.Task, error) {
+	task := db.Task{Name: name}
+	task.SetPriority(priority)
+	result := db.Conn.Create(&task)
+	return &task, result.Error
 }
 
 func init() {
+	addCmd.Flags().StringVarP(&priorityRaw, "priority", "p", "", "Priority: high/medium/low h/m/l")
 	rootCmd.AddCommand(addCmd)
 }
