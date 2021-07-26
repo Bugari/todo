@@ -21,7 +21,6 @@ var doCmd = &cobra.Command{
 			panic(fmt.Sprintf("Incorrect task number: \"%s\"\n", args[0]))
 		}
 
-		now := time.Now()
 		var task db.Task
 
 		result := db.Conn.First(&task, "seq = ?", taskNum)
@@ -29,11 +28,14 @@ var doCmd = &cobra.Command{
 			panic(fmt.Sprintf("Unknown task with number: \"%s\"\n", args[0]))
 		}
 
-		task.Done = &now
-		db.Conn.Save(&task)
-
 		fmt.Printf("Task #%d marked as done: %s\n", task.Seq, task.Name)
 	},
+}
+
+func HandleDone(task *db.Task) {
+	now := time.Now()
+	task.Done = &now
+	db.Conn.Save(&task)
 }
 
 func init() {
