@@ -2,18 +2,12 @@ package cmd_test
 
 import (
 	"fmt"
-	"testing"
 	. "todo/cmd"
 	"todo/db"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
-
-func TestCmd(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Commands tests")
-}
 
 var _ = Describe("Commands", func() {
 	BeforeEach(func() {
