@@ -20,18 +20,26 @@ var undoCmd = &cobra.Command{
 			panic(fmt.Sprintf("Incorrect task number: \"%s\"\n", args[0]))
 		}
 
-		var task db.Task
-
-		result := db.Conn.First(&task, "seq = ?", taskNum)
-		if result.RowsAffected == 0 {
-			panic(fmt.Sprintf("Unknown task with number: \"%s\"\n", args[0]))
+		task, err := HandleUndo(taskNum)
+		if task == nil {
+			fmt.Printf("Task #%d not found\n", taskNum)
+		} else if err != nil {
+			panic(err)
 		}
-
-		task.Done = nil
-		db.Conn.Save(&task)
 
 		fmt.Printf("Task #%d marked as undone: %s\n", task.Seq, task.Name)
 	},
+}
+
+func HandleUndo(taskNum int) (*db.Task, error) {
+	var task db.Task
+	result := db.Conn.First(&task, "seq = ?", taskNum)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
+	task.Done = nil
+	result = db.Conn.Save(&task)
+	return &task, result.Error
 }
 
 func init() {
