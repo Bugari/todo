@@ -21,21 +21,27 @@ var doCmd = &cobra.Command{
 			panic(fmt.Sprintf("Incorrect task number: \"%s\"\n", args[0]))
 		}
 
-		var task db.Task
-
-		result := db.Conn.First(&task, "seq = ?", taskNum)
-		if result.RowsAffected == 0 {
-			panic(fmt.Sprintf("Unknown task with number: \"%s\"\n", args[0]))
+		task, err := HandleDone(taskNum)
+		if task == nil {
+			fmt.Printf("Task #%d not found\n", taskNum)
+		} else if err != nil {
+			panic(err)
 		}
 
 		fmt.Printf("Task #%d marked as done: %s\n", task.Seq, task.Name)
 	},
 }
 
-func HandleDone(task *db.Task) {
+func HandleDone(taskNum int) (*db.Task, error) {
+	var task db.Task
+	result := db.Conn.First(&task, "seq = ?", taskNum)
+	if result.RowsAffected == 0 {
+		return nil, nil
+	}
 	now := time.Now()
 	task.Done = &now
-	db.Conn.Save(&task)
+	result = db.Conn.Save(&task)
+	return &task, result.Error
 }
 
 func init() {

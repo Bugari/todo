@@ -19,24 +19,25 @@ var rmCmd = &cobra.Command{
 		if err != nil {
 			panic(fmt.Sprintf("Incorrect task number: \"%s\"\n", args[0]))
 		}
-		HandleRm(taskNum)
+		task, err := HandleRm(taskNum)
+		if task == nil {
+			fmt.Printf("Task #%d not found\n", taskNum)
+		} else if err != nil {
+			panic(err)
+		}
+
+		fmt.Printf("Task #%d removed: %s\n", task.Seq, task.Name)
 	},
 }
 
-func HandleRm(taskNum int) {
+func HandleRm(taskNum int) (*db.Task, error) {
 	var task db.Task
 	result := db.Conn.First(&task, "seq = ?", taskNum)
-	if result.RowsAffected != 1 {
-		fmt.Printf("Task #%d not found\n", taskNum)
-		return
+	if result.RowsAffected == 0 {
+		return nil, nil
 	}
-
-	if err := db.Conn.Delete(&task).Error; err != nil {
-		panic(err)
-	}
-
-	// db.Conn.Save(&task)
-	fmt.Printf("Task #%d removed: %s\n", task.Seq, task.Name)
+	result = db.Conn.Delete(&task)
+	return &task, result.Error
 }
 
 func init() {
