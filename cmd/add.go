@@ -6,7 +6,6 @@ import (
 
 	"todo/db"
 
-	"github.com/bcampbell/fuzzytime"
 	ft "github.com/bcampbell/fuzzytime"
 	"github.com/spf13/cobra"
 )
@@ -35,7 +34,7 @@ You can use tags #like #this`,
 }
 
 func ParseDateArgs(primary string, secondary string) (*time.Time, error) {
-	var dt fuzzytime.DateTime
+	var dt ft.DateTime
 	var err error
 
 	if primary != "" {
