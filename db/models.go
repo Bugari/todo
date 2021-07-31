@@ -16,6 +16,7 @@ type Task struct {
 	Seq      int       `gorm:"index;"`
 	Name     string
 	Priority int `gorm:"default:3"`
+	Due      *time.Time
 	Done     *time.Time
 	Tags     []*Tag `gorm:"many2many:task_tags;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

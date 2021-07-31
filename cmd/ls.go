@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"os"
+	"time"
 	"todo/db"
 
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -19,14 +20,41 @@ func ScopeDone(db *gorm.DB) *gorm.DB {
 	}
 }
 
+const dayFormat = "2006-01-02"
+const hourFormat = "15:04"
+const zeroHour = "00:00"
+
+func formatDue(task *db.Task) string {
+	due := ""
+	if task.Due == nil {
+		return due
+	}
+
+	nowDate := time.Now().Format(dayFormat)
+	formattedDate := task.Due.Format(dayFormat)
+	formattedHour := task.Due.Format(hourFormat)
+	if formattedDate != nowDate {
+		due += formattedDate
+	} else {
+		due += "today"
+	}
+	if formattedHour != zeroHour {
+		if due != "" {
+			due += " "
+		}
+		due += formattedHour
+	}
+	return due
+}
 func printTasks(tasks *[]db.Task) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"ID", "Seq", "Priority", "Name"})
+	t.AppendHeader(table.Row{"Seq", "Due", "Priority", "Name"})
 
 	rows := make([]table.Row, len(*tasks))
 	for i, task := range *tasks {
-		rows[i] = table.Row{task.ID, task.Seq, task.GetPriority(), task.Name}
+
+		rows[i] = table.Row{task.Seq, formatDue(&task), task.GetPriority(), task.Name}
 	}
 
 	t.AppendRows(rows)
