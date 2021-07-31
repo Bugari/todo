@@ -41,7 +41,7 @@ var _ = Describe("Commands", func() {
 			Expect(countAfter).To(Equal(int64(len(tasks))), "all taks should be in db")
 		})
 	})
-	FContext("parseDate", func() {
+	Context("parseDate", func() {
 		It("should parse secondary properly", func() {
 			now := time.Now()
 			expected := now.Format("02 Jan 06")
