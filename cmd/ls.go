@@ -24,15 +24,13 @@ const dayFormat = "2006-01-02"
 const hourFormat = "15:04"
 const zeroHour = "00:00"
 
-func formatDue(task *db.Task) string {
-	due := ""
-	if task.Due == nil {
-		return due
+func formatDue(taskDue *time.Time) (due string) {
+	if taskDue == nil {
+		return
 	}
-
 	nowDate := time.Now().Format(dayFormat)
-	formattedDate := task.Due.Format(dayFormat)
-	formattedHour := task.Due.Format(hourFormat)
+	formattedDate := taskDue.Format(dayFormat)
+	formattedHour := taskDue.Format(hourFormat)
 	if formattedDate != nowDate {
 		due += formattedDate
 	} else {
@@ -44,7 +42,7 @@ func formatDue(task *db.Task) string {
 		}
 		due += formattedHour
 	}
-	return due
+	return
 }
 func printTasks(tasks *[]db.Task) {
 	t := table.NewWriter()
@@ -54,7 +52,7 @@ func printTasks(tasks *[]db.Task) {
 	rows := make([]table.Row, len(*tasks))
 	for i, task := range *tasks {
 
-		rows[i] = table.Row{task.Seq, formatDue(&task), task.GetPriority(), task.Name}
+		rows[i] = table.Row{task.Seq, formatDue(task.Due), task.GetPriority(), task.Name}
 	}
 
 	t.AppendRows(rows)
@@ -69,15 +67,20 @@ var lsCmd = &cobra.Command{
 Listing updates ordering for following commands.
 Currently lists only undone tasks`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var tasks []db.Task
-		db.Conn.Scopes(ScopeDone).Order("priority asc, created_at").Find(&tasks)
-		if err := resetSeq(&tasks); err != nil {
-			panic(err)
-		}
-		printTasks(&tasks)
+		HandleLs()
 	},
 }
 
+func HandleLs() {
+	var tasks []db.Task
+	db.Conn.Scopes(ScopeDone).Order("priority asc, created_at").Find(&tasks)
+	if err := resetSeq(&tasks); err != nil {
+		panic(err)
+	}
+	printTasks(&tasks)
+}
+
+// resetSeq assigns new seq numbers, numbering only tasks provided in parameter.
 func resetSeq(tasks *[]db.Task) error {
 	tx := db.Conn.Begin()
 	defer func() {
