@@ -91,6 +91,6 @@ func HandleAdd(name string, priority string, due *time.Time) (*db.Task, error) {
 func init() {
 	addCmd.Flags().StringVarP(&priorityRaw, "priority", "p", "", "Priority: high/medium/low h/m/l")
 	addCmd.Flags().StringVarP(&dueDate, "due", "d", "", "Due date")
-	addCmd.Flags().BoolVarP(&ignoreDue, "no-due", "D", false, "no due date")
+	addCmd.Flags().BoolVarP(&ignoreDue, "no-due", "D", false, "Ignore due dates in task description")
 	rootCmd.AddCommand(addCmd)
 }

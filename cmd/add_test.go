@@ -61,5 +61,30 @@ var _ = Describe("Commands", func() {
 			Expect(date).To(BeNil())
 		})
 	})
+	Context("Priorities", func() {
+		store := func(priority string) *db.Task {
+			_, err := HandleAdd("task", priority, nil)
+			Expect(err).To(BeNil())
 
+			var retrievedTask db.Task
+			db.Conn.Model(&db.Task{}).First(&retrievedTask)
+			return &retrievedTask
+		}
+		It("should store high priority correctly", func() {
+			task := store("high")
+			Expect(task.GetPriority()).To(Equal("High"))
+		})
+		It("should store medium priority correctly", func() {
+			task := store("med")
+			Expect(task.GetPriority()).To(Equal("Medium"))
+		})
+		It("should store low priority correctly", func() {
+			task := store("lo")
+			Expect(task.GetPriority()).To(Equal("Low"))
+		})
+		It("should store default priority correctly", func() {
+			task := store("")
+			Expect(task.GetPriority()).To(Equal(""))
+		})
+	})
 })
