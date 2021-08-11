@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"todo/db"
@@ -22,10 +23,11 @@ var addCmd = &cobra.Command{
 You can use tags #like #this`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var due *time.Time
+		body := strings.Join(args, " ")
 		if !ignoreDue {
-			due, _ = ParseDateArgs(dueDate, args[0])
+			due, _ = ParseDateArgs(dueDate, body)
 		}
-		task, err := HandleAdd(args[0], priorityRaw, due)
+		task, err := HandleAdd(body, priorityRaw, due)
 		if err != nil {
 			panic(err)
 		}
