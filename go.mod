@@ -3,7 +3,7 @@ module todo
 go 1.16
 
 require (
-	github.com/bcampbell/fuzzytime v0.0.0-20191010161914-05ea0010feac // indirect
+	github.com/bcampbell/fuzzytime v0.0.0-20191010161914-05ea0010feac
 	github.com/google/uuid v1.3.0
 	github.com/jedib0t/go-pretty/v6 v6.2.4
 	github.com/onsi/ginkgo v1.16.4
