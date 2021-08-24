@@ -9,16 +9,13 @@
       "args": ["ls"]
     },
     {
-      "name": "Test Current File",
+      "name": "Run cmd tests",
       "type": "go",
       "request": "launch",
+      "stopOnEntry": false,
       "mode": "test",
-      "remotePath": "",
-      "port": 2345,
       "host": "127.0.0.1",
-      "program": "${file}",
-      "env": {},
-      "args": [],
+      "program": "./cmd",
       "showLog": true
     }
   ]
