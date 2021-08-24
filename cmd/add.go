@@ -11,9 +11,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var priorityRaw = ""
-var dueDate = ""
-var ignoreDue = false
+type AddArgs struct {
+	Name        string
+	PriorityRaw string
+	NoPriority  bool
+	DueDate     string
+	NoDue       bool
+}
+
+var addArgs = AddArgs{}
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
@@ -22,12 +28,8 @@ var addCmd = &cobra.Command{
 	Long: `Add new task.
 You can use tags #like #this`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var due *time.Time
-		body := strings.Join(args, " ")
-		if !ignoreDue {
-			due, _ = ParseDateArgs(dueDate, body)
-		}
-		task, err := HandleAdd(body, priorityRaw, due)
+		addArgs.Name = strings.Join(args, " ")
+		task, err := HandleAdd(&addArgs)
 		if err != nil {
 			panic(err)
 		}
@@ -79,20 +81,41 @@ func fuzzytimeToDateTime(fuzzy *ft.DateTime) *time.Time {
 
 	time := time.Date(year, month, day, hour, minute, second, nsec, now.Location())
 	return &time
-
 }
 
-func HandleAdd(name string, priority string, due *time.Time) (*db.Task, error) {
-	task := db.Task{Name: name} //, Due:
-	task.SetPriority(priority)
-	task.Due = due
+func HandleAdd(args *AddArgs) (*db.Task, error) {
+	task := db.Task{}
+	applyArgsToTask(&task, args)
 	result := db.Conn.Create(&task)
 	return &task, result.Error
 }
 
+func applyArgsToTask(task *db.Task, args *AddArgs) {
+	if args.Name != "" {
+		task.Name = args.Name
+	}
+	if args.NoDue && task.Due != nil {
+		task.Due = nil
+	}
+	date, err := ParseDateArgs(addArgs.DueDate, args.Name)
+	if !args.NoDue && err == nil {
+		task.Due = date
+	}
+	if args.NoPriority {
+		task.SetPriority("")
+	} else if args.PriorityRaw != "" {
+		task.SetPriority(args.PriorityRaw)
+	}
+}
+
+func attachAddParams(cmd *cobra.Command, params *AddArgs) {
+	cmd.Flags().StringVarP(&params.PriorityRaw, "priority", "p", "", "Priority: high/medium/low h/m/l")
+	cmd.Flags().BoolVarP(&params.NoPriority, "no-priority", "P", false, "Force no priority")
+	cmd.Flags().StringVarP(&params.DueDate, "due", "d", "", "Due date")
+	cmd.Flags().BoolVarP(&params.NoDue, "no-due", "D", false, "Force no due date")
+
+}
 func init() {
-	addCmd.Flags().StringVarP(&priorityRaw, "priority", "p", "", "Priority: high/medium/low h/m/l")
-	addCmd.Flags().StringVarP(&dueDate, "due", "d", "", "Due date")
-	addCmd.Flags().BoolVarP(&ignoreDue, "no-due", "D", false, "Ignore due dates in task description")
+	attachAddParams(addCmd, &addArgs)
 	rootCmd.AddCommand(addCmd)
 }

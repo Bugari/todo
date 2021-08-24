@@ -20,7 +20,7 @@ var _ = Describe("Commands", func() {
 			var countExpected int64 = 1
 			var countGot int64 = -1
 
-			_, err := HandleAdd("task", "", nil)
+			_, err := HandleAdd(&AddArgs{Name: "task"})
 
 			Expect(err).To(BeNil(), "error while adding task")
 
@@ -29,11 +29,11 @@ var _ = Describe("Commands", func() {
 		})
 
 		It("should add multiple tasks properly", func() {
-			var tasks = []string{"task 1", "task 2", "task 3"}
+			var tasks = []AddArgs{{Name: "task 1"}, {Name: "task 2"}, {Name: "task 2"}}
 			var countAfter int64 = 0
 
 			for _, t := range tasks {
-				HandleAdd(t, "", nil)
+				HandleAdd(&t)
 			}
 
 			db.Conn.Model(&db.Task{}).Where("1 = 1").Count(&countAfter)
@@ -63,7 +63,7 @@ var _ = Describe("Commands", func() {
 	})
 	Context("Priorities", func() {
 		store := func(priority string) *db.Task {
-			_, err := HandleAdd("task", priority, nil)
+			_, err := HandleAdd(&AddArgs{Name: "task", PriorityRaw: priority, NoPriority: priority == ""})
 			Expect(err).To(BeNil())
 
 			var retrievedTask db.Task
